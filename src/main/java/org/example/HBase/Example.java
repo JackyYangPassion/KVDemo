@@ -1,0 +1,250 @@
+package org.example.HBase;
+
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 1. 创建表
+ * 2. 数据进行CRUD 了解使用特性
+ */
+public class Example {
+    public static final int DEFAULT_SCAN_CACHING = 1000;//此处保证了 一次RPC请求 结果够用，next 不会再发起请求
+    public static final String EMPTY_COLUMN_NAME = "_0";
+    public static final byte[] EMPTY_COLUMN_BYTES = Bytes.toBytes(EMPTY_COLUMN_NAME);
+    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    private final Configuration hbaseConf;
+    private final TableName tableName;
+    private final Connection conn;
+    public Example(Configuration hbaseConf, final String tableName) {
+        try {
+            this.hbaseConf = hbaseConf;
+            hbaseConf.set("hbase.zookeeper.quorum", "127.0.0.1:2181");
+            hbaseConf.set("zookeeper.znode.parent", "/hbase-unsecure");
+            this.conn = ConnectionFactory.createConnection(hbaseConf);
+            this.tableName = TableName.valueOf(tableName);
+        } catch (Exception ex) {
+            throw new RuntimeException("HBase client preparation failed.", ex);
+        }
+    }
+
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
+                             int caching, int versions, FilterList filterList, int limit)
+            throws IOException, InterruptedException {
+        Scan scan = new Scan();
+
+        scan.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME, Bytes.toBytes(true));//开启scan metrics
+        if (startRow != null) {
+            scan.withStartRow(startRow);
+        }
+
+        if(endRow != null){
+            scan.withStopRow(endRow);
+        }
+
+        if (startTime > 0 && endTime > 0) {
+            scan.setTimeRange(startTime, endTime);
+        }
+        if (caching >= 0) {
+            scan.setCaching(caching);
+        }
+        if (versions > 0) {
+
+
+        }
+        if (filterList != null) {
+            scan.setFilter(filterList);
+        }
+
+        Table table = getTable();
+        ResultScanner scanner = null;
+
+        List<Result> results = new ArrayList<>();
+        try {
+            scanner = table.getScanner(scan);
+            Result result;
+            int i = 0;
+            while ((result = scanner.next()) != null && i < limit) {
+                if (!result.isEmpty()) {
+                    results.add(result);
+                    i++;
+                }
+            }
+        } finally {
+            if (scanner != null) scanner.close();
+            table.close();
+        }
+        return results;
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
+                             int caching, int versions, FilterList filterList)
+            throws IOException, InterruptedException {
+        return scan(startRow, endRow, startTime, endTime, caching, versions, filterList,
+                Integer.MAX_VALUE);
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow)
+            throws IOException, InterruptedException {
+        return scan(startRow, endRow, -1, -1, DEFAULT_SCAN_CACHING, 1, null);
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, int limit)
+            throws IOException, InterruptedException {
+        return scan(startRow, endRow, -1, -1, DEFAULT_SCAN_CACHING, 1, null, limit);
+    }
+
+    public List<Result> scan(long startTime, long endTime, FilterList filterList)
+            throws IOException, InterruptedException {
+        return scan(null, null, startTime, endTime, DEFAULT_SCAN_CACHING, 1, filterList);
+    }
+
+    public List<Result> scan(long startTime, long endTime)
+            throws IOException, InterruptedException {
+        return scan(null, null, startTime, endTime, DEFAULT_SCAN_CACHING, 1, null);
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
+                             FilterList filterList) throws IOException, InterruptedException {
+        return scan(startRow, endRow, startTime, endTime, DEFAULT_SCAN_CACHING, 1, filterList);
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, int caching, FilterList filterList)
+            throws IOException, InterruptedException {
+        return scan(startRow, endRow, -1, -1, caching, 1, filterList);
+    }
+
+    public List<Result> scan(byte[] startRow, byte[] endRow, int caching, FilterList filterList,
+                             int limit) throws IOException, InterruptedException {
+        return scan(startRow, endRow, -1, -1, caching, 1, filterList, limit);
+    }
+
+    public Result get(Get get) throws IOException {
+        Table table = getTable();
+        try {
+            return table.get(get);
+        } finally {
+            table.close();
+        }
+    }
+
+    public boolean exists(Get get) throws IOException {
+        Table table = getTable();
+        try {
+            return table.exists(get);
+        } finally {
+            table.close();
+        }
+    }
+
+    public Result[] batchGet(List<Get> gets) throws IOException {
+        Table table = getTable();
+        try {
+            return table.get(gets);
+        } finally {
+            table.close();
+        }
+    }
+
+    public void put(Put put) throws IOException {
+        Table table = getTable();
+        try {
+            table.put(put);
+        } finally {
+            table.close();
+        }
+    }
+
+    /**
+     * This is used to make a put compatible to phoenix table.
+     * An empty column will be added silently so that queries by phoenix
+     * work as expected.
+     *
+     * @param put    the original put
+     * @param family the first column family in phoenix where the empty column will be added
+     */
+    public void putWithEmptyColumn(Put put, byte[] family) throws IOException {
+        Table table = getTable();
+        try {
+            table.put(addEmptyColumn(put, family));
+        } finally {
+            table.close();
+        }
+    }
+
+    public Put addEmptyColumn(Put put, byte[] family) {
+        put.addColumn(family, EMPTY_COLUMN_BYTES, EMPTY_BYTE_ARRAY);
+        return put;
+    }
+
+    public void delete(Delete delete) throws IOException {
+        Table table = getTable();
+        try {
+            table.delete(delete);
+        } finally {
+            table.close();
+        }
+    }
+
+    public void batchMutate(List<Mutation> mutations) throws IOException, InterruptedException {
+        Table table = getTable();
+        try {
+            Object[] result = new Object[mutations.size()];
+            table.batch(mutations, result);
+        } finally {
+            table.close();
+        }
+    }
+
+    public void close() throws IOException {
+        conn.close();
+    }
+
+    public Table getTable() throws IOException {
+        Table table = conn.getTable(tableName);
+        return table;
+    }
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Configuration hbaseConf = new Configuration();
+        Example example = new Example(hbaseConf,"mygraph:edges");
+
+        Put put = new Put(Bytes.toBytes("1"));
+        put.addColumn(Bytes.toBytes("f"),Bytes.toBytes("1"),Bytes.toBytes("1"));
+        example.put(put);
+
+        Get get = new Get(Bytes.toBytes("1"));
+        Result rsGet = example.get(get);
+        System.out.println("rsGet: " + rsGet);
+
+
+
+
+
+
+        String startRow = "1";
+        String endRow = "2";
+
+        //此处返回的是一个List 不是一个迭代器
+        //迭代器Iterator 模式有什么好处以及区别？
+        List<Result> result = example.scan(Bytes.toBytes(startRow),Bytes.toBytes(endRow));
+
+        System.out.println("===========print result for scan==========");
+        for(Result rs: result){
+            System.out.println(rs);
+        }
+    }
+
+}
