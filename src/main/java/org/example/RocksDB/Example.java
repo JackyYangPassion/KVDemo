@@ -127,6 +127,8 @@ public class Example {
         Example test = new Example();
         test.testDefaultColumnFamily();
         test.testCertainColumnFamily();
+
+        //TODO：类比HugeGraph 中 Scan 查询写法：抽象表达
     }
 
 }
