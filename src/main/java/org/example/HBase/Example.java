@@ -2,15 +2,14 @@ package org.example.HBase;
 
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -39,9 +38,23 @@ public class Example {
     }
 
 
+    /**
+     * 此方法主要是对HBase Scan 封装，对上层屏蔽掉优化细节
+     * TODO： 这种方式是不是比迭代器方式浪费内存？但是性能好？
+     * @param startRow
+     * @param endRow
+     * @param startTime
+     * @param endTime
+     * @param caching
+     * @param versions
+     * @param filterList
+     * @param limit
+     * @return
+     * @throws IOException
+     */
     public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
                              int caching, int versions, FilterList filterList, int limit)
-            throws IOException, InterruptedException {
+            throws IOException {
         Scan scan = new Scan();
 
         scan.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME, Bytes.toBytes(true));//开启scan metrics
@@ -90,43 +103,43 @@ public class Example {
 
     public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
                              int caching, int versions, FilterList filterList)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(startRow, endRow, startTime, endTime, caching, versions, filterList,
                 Integer.MAX_VALUE);
     }
 
     public List<Result> scan(byte[] startRow, byte[] endRow)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(startRow, endRow, -1, -1, DEFAULT_SCAN_CACHING, 1, null);
     }
 
     public List<Result> scan(byte[] startRow, byte[] endRow, int limit)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(startRow, endRow, -1, -1, DEFAULT_SCAN_CACHING, 1, null, limit);
     }
 
     public List<Result> scan(long startTime, long endTime, FilterList filterList)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(null, null, startTime, endTime, DEFAULT_SCAN_CACHING, 1, filterList);
     }
 
     public List<Result> scan(long startTime, long endTime)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(null, null, startTime, endTime, DEFAULT_SCAN_CACHING, 1, null);
     }
 
     public List<Result> scan(byte[] startRow, byte[] endRow, long startTime, long endTime,
-                             FilterList filterList) throws IOException, InterruptedException {
+                             FilterList filterList) throws IOException {
         return scan(startRow, endRow, startTime, endTime, DEFAULT_SCAN_CACHING, 1, filterList);
     }
 
     public List<Result> scan(byte[] startRow, byte[] endRow, int caching, FilterList filterList)
-            throws IOException, InterruptedException {
+            throws IOException {
         return scan(startRow, endRow, -1, -1, caching, 1, filterList);
     }
 
     public List<Result> scan(byte[] startRow, byte[] endRow, int caching, FilterList filterList,
-                             int limit) throws IOException, InterruptedException {
+                             int limit) throws IOException {
         return scan(startRow, endRow, -1, -1, caching, 1, filterList, limit);
     }
 
@@ -217,7 +230,7 @@ public class Example {
     }
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         Configuration hbaseConf = new Configuration();
         Example example = new Example(hbaseConf,"mygraph:edges");
 
@@ -230,20 +243,29 @@ public class Example {
         System.out.println("rsGet: " + rsGet);
 
 
-
-
-
-
         String startRow = "1";
         String endRow = "2";
 
         //此处返回的是一个List 不是一个迭代器
-        //迭代器Iterator 模式有什么好处以及区别？
+        //迭代器Iterator 模式有什么好处以及区别：
+        //内存节省角度： scan cache + list<Result> 比迭代器双倍内存？ 但是速度快？
         List<Result> result = example.scan(Bytes.toBytes(startRow),Bytes.toBytes(endRow));
-
         System.out.println("===========print result for scan==========");
         for(Result rs: result){
             System.out.println(rs);
+        }
+
+
+        //迭代器Iterator 访问 Scan 结果
+        Scan scan = new Scan();
+        scan.withStartRow(Bytes.toBytes(startRow));
+        scan.withStopRow(Bytes.toBytes(endRow));
+        Table table = example.getTable();
+        ResultScanner scanner = table.getScanner(scan);
+        Iterator<Result> iterator = scanner.iterator();
+        System.out.println("============Get Result From Iterator============");
+        while(iterator.hasNext()){
+            System.out.println(iterator.next());
         }
     }
 
