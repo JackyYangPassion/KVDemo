@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 /**
  * 1.实现 RocksDB 单机版 基本数据操作 CRUD
  *
- * ref: https://github.com/sxpujs/java-example/blob/master/src/main/java/com/demo/rocksdb/RocksDBExample.java
+ * ref:
+ * 1. Code     https://github.com/sxpujs/java-example/blob/master/src/main/java/com/demo/rocksdb/RocksDBExample.java
+ * 2. 原理介绍  https://zhuanlan.zhihu.com/p/133735533
  */
 public class Example {
 
