@@ -5,12 +5,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.MultiRowRangeFilter;
+import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 1. 创建表
@@ -234,15 +234,42 @@ public class Example {
         Configuration hbaseConf = new Configuration();
         Example example = new Example(hbaseConf,"mygraph:edges");
 
+        /**
+         * ADD KeyValue To HBase
+         */
         Put put = new Put(Bytes.toBytes("1"));
         put.addColumn(Bytes.toBytes("f"),Bytes.toBytes("1"),Bytes.toBytes("1"));
         example.put(put);
 
+
+        Put put2 = new Put(Bytes.toBytes("2"));
+        put2.addColumn(Bytes.toBytes("f"),Bytes.toBytes("1"),Bytes.toBytes("2"));
+        example.put(put2);
+
+
+
+        Put put3 = new Put(Bytes.toBytes("13"));
+        put3.addColumn(Bytes.toBytes("f"),Bytes.toBytes("1"),Bytes.toBytes("3"));
+        example.put(put3);
+
+
+        Put put4 = new Put(Bytes.toBytes("24"));
+        put4.addColumn(Bytes.toBytes("f"),Bytes.toBytes("1"),Bytes.toBytes("4"));
+        example.put(put4);
+
+
+        /**
+         * Get KeyValue From HBase
+         */
         Get get = new Get(Bytes.toBytes("1"));
         Result rsGet = example.get(get);
         System.out.println("rsGet: " + rsGet);
 
 
+
+        /**
+         * Scan KeyValue From HBase with Start Row and End Row
+         */
         String startRow = "1";
         String endRow = "2";
 
@@ -267,6 +294,40 @@ public class Example {
         while(iterator.hasNext()){
             System.out.println(iterator.next());
         }
+
+
+        /**
+         * Scan KeyValue From HBase with PrefixFilter
+         * 1. 使用双层迭代器
+         * 2. 使用单层迭代器
+         */
+        Set<byte[]> prefixes = new HashSet<>();
+        prefixes.add(Bytes.toBytes("1"));
+        prefixes.add(Bytes.toBytes("2"));
+
+        //传递多个 Filter 到底层
+        FilterList orFilters = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+        for (byte[] prefix : prefixes) {
+            FilterList andFilters = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+            List<MultiRowRangeFilter.RowRange> ranges = new ArrayList<>();
+            ranges.add(new MultiRowRangeFilter.RowRange(prefix, true, null, true));
+            andFilters.addFilter(new MultiRowRangeFilter(ranges));
+            andFilters.addFilter(new PrefixFilter(prefix));
+
+            orFilters.addFilter(andFilters);
+        }
+
+        Scan scanFilterList = new Scan().setFilter(orFilters);
+
+
+        Table tableFilter = example.getTable();
+        ResultScanner scannerFilter = tableFilter.getScanner(scanFilterList);
+        Iterator<Result> iteratorFilter = scannerFilter.iterator();
+        System.out.println("============Get Result From Iterator FilterList============");
+        while(iteratorFilter.hasNext()){
+            System.out.println(iteratorFilter.next());
+        }
+
     }
 
 }
