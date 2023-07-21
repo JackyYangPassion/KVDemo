@@ -12,10 +12,24 @@ import java.util.concurrent.*;
 
 //请编写一段Java 代码，进行多线程并发读写HBase mygraph:edges表 1000万条数据 code by compilot
 //目标：复现CPU load 高的问题
+
+/**
+ * 复现步骤：
+ * 1. 前置条件：HBase(分布式HMaster/RS 配置中Mem 不刷新)/ZK/Grafana/arthas 已在本机安装
+ * 2. 运行该程序，观察CPU load
+ *    a. 先写入 100 条, 每条 10,000 条重复数据(同步观察Mem，不刷新)
+ *    b. 停止写入，修改逻辑，100条数据并发读取 100,000 次(同步观察Mem，不刷新)
+ *       1. 不指定列名 new Get(rowKey.getBytes())
+ *          火焰图 20230721-134019.html，20230721-134044.html
+ *       2. 指定列名   new Get(rowKey.getBytes()).addColumn(columnFamily.getBytes(), qualifier.getBytes());
+ *          火焰图 20230721-134334.html，20230721-134420.html
+ *       以上两个步骤分别抓取火焰图两次
+ */
+
 public class HBaseConcurrentReadWriteExample {
 
     private static final String TABLE_NAME = "mygraph:edges";
-    private static final int TOTAL_RECORDS = 10000000;
+    private static final int TOTAL_RECORDS = 100;
     private static final int THREAD_POOL_SIZE = 10;
 
     public static void main(String[] args) {
@@ -38,27 +52,37 @@ public class HBaseConcurrentReadWriteExample {
                 Callable<Void> task = () -> {
                     try {
                         //每一组进行10次操作
-                        for(int j = 0; j < 10; j++){
+                        for(int j = 0; j < 100000; j++){
                             //先进行Get 操作
-
 
                             //构造行键和数据
                             String rowKey = "row" + recordNumber;
                             String columnFamily = "f";
-                            String qualifier = "1";
+                            String qualifier = "";
                             String value = "value" + recordNumber;
 
-                            Get get = new Get(rowKey.getBytes());
+                            // 创建Put对象并设置行键和数据
+//                            Put put = new Put(rowKey.getBytes());
+//                            put.addColumn(columnFamily.getBytes(), qualifier.getBytes(), value.getBytes());
+//
+//                            // 插入数据
+//                            table.put(put);
+
+
+
+                            Get get = new Get(rowKey.getBytes()).addColumn(columnFamily.getBytes(), qualifier.getBytes());
                             // 插入数据
                             table.get(get);
 
 
-                            // 创建Put对象并设置行键和数据
-                            Put put = new Put(rowKey.getBytes());
-                            put.addColumn(columnFamily.getBytes(), qualifier.getBytes(), value.getBytes());
 
-                            // 插入数据
-                            table.put(put);
+
+//                            // 创建Put对象并设置行键和数据
+//                            Put put1 = new Put(rowKey.getBytes());
+//                            put1.addColumn(columnFamily.getBytes(), qualifier.getBytes(), value.getBytes());
+//
+//                            // 插入数据
+//                            table.put(put1);
 
                         }
 
