@@ -1,0 +1,296 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<configuration>
+  <!--
+    The following properties are set for running HBase as a single process on a
+    developer workstation. With this configuration, HBase is running in
+    "stand-alone" mode and without a distributed file system. In this mode, and
+    without further configuration, HBase and ZooKeeper data are stored on the
+    local filesystem, in a path under the value configured for `hbase.tmp.dir`.
+    This value is overridden from its default value of `/tmp` because many
+    systems clean `/tmp` on a regular basis. Instead, it points to a path within
+    this HBase installation directory.
+
+    Running against the `LocalFileSystem`, as opposed to a distributed
+    filesystem, runs the risk of data integrity issues and data loss. Normally
+    HBase will refuse to run in such an environment. Setting
+    `hbase.unsafe.stream.capability.enforce` to `false` overrides this behavior,
+    permitting operation. This configuration is for the developer workstation
+    only and __should not be used in production!__
+
+    See also https://hbase.apache.org/book.html#standalone_dist
+  -->
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.tmp.dir</name>
+    <value>${env.HBASE_HOME:-.}/tmp</value>
+  </property>
+  <property>
+    <name>hbase.unsafe.stream.capability.enforce</name>
+    <value>false</value>
+  </property>
+  
+    <property>
+      <name>hbase.client.keyvalue.maxsize</name>
+      <value>1048576</value>
+    </property>
+    
+    <property>
+      <name>hbase.client.retries.number</name>
+      <value>35</value>
+    </property>
+    
+    <property>
+      <name>hbase.client.scanner.caching</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+      <name>hbase.coprocessor.master.classes</name>
+      <value>org.apache.hadoop.hbase.rsgroup.RSGroupAdminEndpoint</value>
+    </property>
+    
+    
+    <property>
+      <name>hbase.defaults.for.version.skip</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.majorcompaction</name>
+      <value>0</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.majorcompaction.jitter</name>
+      <value>0.50</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.max.filesize</name>
+      <value>107374182400</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.memstore.block.multiplier</name>
+      <value>4</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.memstore.flush.size</name>
+      <value>134217728</value>
+    </property>
+    
+    <property>
+      <name>hbase.hregion.memstore.mslab.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.blockingStoreFiles</name>
+      <value>10000</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.max</name>
+      <value>10</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.max.size</name>
+      <value>5368709120</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.min</name>
+      <value>5</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.min.size</name>
+      <value>10000000</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.ratio</name>
+      <value>5</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.throughput.higher.bound</name>
+      <value>150000000</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.throughput.lower.bound</name>
+      <value>150000000</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compaction.throughput.offpeak</name>
+      <value>629145600</value>
+    </property>
+    
+    <property>
+      <name>hbase.hstore.compactionThreshold</name>
+      <value>1000</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.info.port</name>
+      <value>16010</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.loadbalancer.class</name>
+      <value>org.apache.hadoop.hbase.rsgroup.RSGroupBasedLoadBalancer</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.namespace.init.timeout</name>
+      <value>2400000</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.port</name>
+      <value>16000</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.ui.readonly</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>hbase.master.wait.on.regionservers.timeout</name>
+      <value>30000</value>
+    </property>
+    
+    <property>
+      <name>hbase.offpeak.end.hour</name>
+      <value>7</value>
+    </property>
+    
+    <property>
+      <name>hbase.offpeak.start.hour</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.executor.closeregion.threads</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.executor.openregion.threads</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.global.memstore.size</name>
+      <value>0.4</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.handler.count</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.info.port</name>
+      <value>16030</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.port</name>
+      <value>16020</value>
+    </property>
+   
+    <property> 
+      <name>hbase.regionserver.thread.compaction.large</name>
+      <value>3</value>
+    </property>
+    
+    <property>
+      <name>hbase.regionserver.thread.compaction.small</name>
+      <value>5</value>
+    </property>
+    
+    
+    <property>
+      <name>hbase.replication.source.maxthreads</name>
+      <value>10</value>
+    </property>
+    
+    <property>
+      <name>hbase.storescanner.parallel.seek.enable</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>hbase.storescanner.parallel.seek.threads</name>
+      <value>32</value>
+    </property>
+    
+    <property>
+      <name>hbase.superuser</name>
+      <value>hbase</value>
+    </property>
+    
+    <property>
+      <name>hbase.tmp.dir</name>
+      <value>/tmp/hbase-${user.name}</value>
+    </property>
+    
+    <property>
+      <name>hbase.zookeeper.property.clientPort</name>
+      <value>2181</value>
+    </property>
+    
+    <property>
+      <name>hbase.zookeeper.useMulti</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>hfile.block.cache.size</name>
+      <value>0.4</value>
+    </property>
+    
+    <property>
+      <name>zookeeper.recovery.retry</name>
+      <value>6</value>
+    </property>
+    
+    <property>
+      <name>zookeeper.session.timeout</name>
+      <value>90000</value>
+    </property>
+    
+    <property>
+      <name>zookeeper.znode.parent</name>
+      <value>/hbase-unsecure</value>
+    </property>
+</configuration>
