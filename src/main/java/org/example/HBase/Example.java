@@ -328,6 +328,9 @@ public class Example {
             System.out.println(iteratorFilter.next());
         }
 
+        //HBase 多个prefixKey 一次scan 查询返回结果
+
+
     }
 
 }

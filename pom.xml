@@ -26,6 +26,12 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>3.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -41,6 +47,19 @@
             <artifactId>rocksdbjni</artifactId>
             <version>7.2.2</version>
         </dependency>
+
+        <!--hugegraph HStore Dependency-->
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>hg-store-client</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>hg-pd-client</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>
