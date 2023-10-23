@@ -61,7 +61,7 @@ public class HBaseMultiplePrefixScan {
     // Perform the scan operation for a specific prefix key
     private static Iterator<Result> performScan(Table table, byte[] prefixKey) throws Exception {
         Scan scan = new Scan();
-        scan.setStartStopRowForPrefixScan(prefixKey);
+//        scan.setStartStopRowForPrefixScan(prefixKey);
         ResultScanner scanner = table.getScanner(scan);
 
         // Return the iterator directly
