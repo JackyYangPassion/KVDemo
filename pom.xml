@@ -15,6 +15,7 @@
     </properties>
 
     <dependencies>
+
         <!--//请给出HBase3.0.0 Client pom 依赖-->
          <dependency>
             <groupId>org.apache.hbase</groupId>
@@ -74,6 +75,32 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.13.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>hugegraph-client</artifactId>
+            <version>1.2.0</version>
+            <exclusions>
+                <!-- Note: jackson version should < 2.13 with scala 2.12 -->
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>error_prone_annotations</artifactId>
+                    <groupId>com.google.errorprone</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
         <!--MiniBase dependency-->
         <dependency>
