@@ -452,4 +452,16 @@ public class HgStoreTestUtil {
 //        System.out.println("Fail: " + metrics.getFailureCount() + " times.");
 //        System.out.println("*************************************************");
 //    }
+
+    public static int amountOf(Iterator iterator) {
+        if (iterator == null) {
+            return 0;
+        }
+        int count = 0;
+        while (iterator.hasNext()) {
+            Object obj = iterator.next();
+            ++count;
+        }
+        return count;
+    }
 }

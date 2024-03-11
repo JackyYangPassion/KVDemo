@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.hugegraph.driver.GraphManager;
 import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.pd.common.PDException;
 import org.apache.hugegraph.serializer.direct.HBaseSerializer;
 import org.apache.hugegraph.serializer.direct.HStoreSerializer;
 import org.apache.hugegraph.serializer.direct.RocksDBSerializer;
@@ -24,7 +25,7 @@ import org.example.HStore.HStoreSessionImpl;
 public class BytesDemo1 {
 
     static HugeClient client;
-    boolean bypassServer = true;
+    boolean bypassServer = false;
     static SchemaManager schema;
     HStoreSerializer hStoreSerializer;
     static HStoreSessionImpl HStore;
@@ -42,7 +43,7 @@ public class BytesDemo1 {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws PDException {
         String deleteActionType = "delete";
         String putActionType = "put";
 
@@ -58,6 +59,9 @@ public class BytesDemo1 {
 
         System.out.println("====scan out edges====");
         HStore.scan("out_edge");//查询点边数据
+
+        System.out.println("====get store partitions====");
+        HStore.getPartitions();
 //
 //
 //        System.out.println("====scan in edges====");
@@ -142,7 +146,7 @@ public class BytesDemo1 {
         List<Vertex> vertices = new ArrayList<Vertex>() {{
             add(peter);
             add(lop);
-//            add(vadasB);
+            add(vadasB);
         }};
 
         List<Edge> edges = new ArrayList<Edge>() {{
@@ -170,19 +174,23 @@ public class BytesDemo1 {
      * */
     void writeDirectly(List<Vertex> vertices, List<Edge> edges) {
         for (Vertex vertex : vertices) {
+            byte[] ownerRowkey = hStoreSerializer.getOwnerKeyBytes(vertex);
             byte[] rowkey = hStoreSerializer.getKeyBytes(vertex);
             byte[] values = hStoreSerializer.getValueBytes(vertex);
-            sendRpcToHStorePut("vertex",null, rowkey, values);
+            sendRpcToHStorePut("vertex",ownerRowkey, rowkey, values);
         }
 
         for (Edge edge : edges) {
+            byte[] ownerRowkey = hStoreSerializer.getOwnerKeyBytes(edge);
             byte[] rowkey = hStoreSerializer.getKeyBytes(edge);
             byte[] values = hStoreSerializer.getValueBytes(edge);
-            sendRpcToHStorePut("edge", IdGenerator.of(edge.sourceId()).asBytes(), rowkey, values);
+            sendRpcToHStorePut("edge", ownerRowkey, rowkey, values);
 
+            //TODO: switch 需要使用 target_vertiecs 当作ownerKey
+            byte[] ownerRowkeySwitch = hStoreSerializer.getOwnerKeyBytes(edge);
             byte[] rowkeySwitch = hStoreSerializer.getKeyBytesSwitchDirection(edge);
             byte[] valuesSwitch = hStoreSerializer.getValueBytes(edge);
-            sendRpcToHStorePut("edge", IdGenerator.of(edge.targetId()).asBytes(), rowkeySwitch, valuesSwitch);
+            sendRpcToHStorePut("edge", ownerRowkeySwitch, rowkeySwitch, valuesSwitch);
         }
     }
 
@@ -264,7 +272,7 @@ public class BytesDemo1 {
     boolean put(String type, byte[] ownerKey ,byte[] rowkey, byte[] values) throws IOException {
         // TODO: put to HBase/HStore
         if(type.equals("vertex")){
-            HStore.addVetices(rowkey,values);
+            HStore.addVetices(ownerKey,rowkey,values);
         }else if(type.equals("edge")){
             HStore.addEdges(ownerKey,rowkey,values);
         }
