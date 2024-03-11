@@ -2,7 +2,12 @@ package org.example.HStore;
 
 import org.apache.hugegraph.pd.client.PDClient;
 import org.apache.hugegraph.pd.client.PDConfig;
-import org.apache.hugegraph.store.*;
+import org.apache.hugegraph.store.HgOwnerKey;
+import org.apache.hugegraph.store.HgStoreClient;
+import org.apache.hugegraph.store.HgStoreSession;
+import org.apache.hugegraph.store.HgKvEntry;
+import org.apache.hugegraph.store.HgKvIterator;
+
 
 import java.nio.charset.StandardCharsets;
 
@@ -58,15 +63,28 @@ public class HStoreSessionImpl {
         graph.put(VETEX_TABLE_NAME, key, values);
     }
 
+    public void deleteVertices(byte[] ownerkey,byte[] rowkey){
+        HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
+        graph.delete(VETEX_TABLE_NAME, key);
+    }
+
 
     /**
      * 写入边表
      * @param rowkey
      * @param values
      */
-    public void addEdges(byte[] rowkey, byte[] values){
-        HgOwnerKey key = HgOwnerKey.of(rowkey, rowkey);
-        graph.put(VETEX_TABLE_NAME, key, values);
+    public void addEdges(byte[] ownerkey, byte[] rowkey, byte[] values){
+        HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
+        graph.put(OUT_EDGE_TABLE_NAME, key, values);
+    }
+
+
+
+    public void deleteEdges(byte[] ownerkey,byte[] rowkey){
+        HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
+        graph.delete(OUT_EDGE_TABLE_NAME, key);
+        graph.delete(IN_EDGE_TABLE_NAME, key);
     }
 
 
@@ -92,6 +110,29 @@ public class HStoreSessionImpl {
         iterator = graph.scanIterator(OUT_EDGE_TABLE_NAME);
     }
 
+
+
+    public void scan(String type){
+        HgKvIterator<HgKvEntry> iterator = null;
+        if(type.equals("in_edge")){
+            iterator = graph.scanIterator(IN_EDGE_TABLE_NAME);
+        } else if(type.equals("out_edge")) {
+            iterator = graph.scanIterator(OUT_EDGE_TABLE_NAME);
+        } else if(type.equals("vertices")){
+            iterator = graph.scanIterator(VETEX_TABLE_NAME);
+        }
+
+
+        System.out.println("Scan type: "+type);
+        while (iterator.hasNext()) {
+            HgKvEntry entry = iterator.next();
+            byte[] keyFromHStore = entry.key();
+            byte[] valueFromHStore = entry.value();
+
+            System.out.println("key: "+ toStr(keyFromHStore)+"  value: "+toStr(valueFromHStore));
+        }
+    }
+
     public static HgOwnerKey toOwnerKey(String owner, String key) {
         return new HgOwnerKey(toBytes(owner), toBytes(key));
     }
@@ -104,6 +145,6 @@ public class HStoreSessionImpl {
     }
 
     public static void main(String args[]){
-        new HStoreSessionImpl().truncateTest();
+        new HStoreSessionImpl().scan("vertices");
     }
 }
