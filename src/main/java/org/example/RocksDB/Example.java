@@ -1,6 +1,18 @@
 package org.example.RocksDB;
 
-import org.rocksdb.*;
+
+
+import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
+import org.rocksdb.DBOptions;
+import org.rocksdb.ColumnFamilyOptions;
+import org.rocksdb.ColumnFamilyDescriptor;
+import org.rocksdb.ColumnFamilyHandle;
+
+import org.rocksdb.WriteBatch;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +38,12 @@ public class Example {
 
     //  RocksDB.DEFAULT_COLUMN_FAMILY
     public void testDefaultColumnFamily() {
+
+//        WriteBatch wb = new WriteBatch();
+//        wb.put();
+
+
+
         System.out.println("testDefaultColumnFamily begin...");
         // 文件不存在，则先创建文件
         try (final Options options = new Options().setCreateIfMissing(true)) {

@@ -58,7 +58,7 @@ public class HStoreSessionImpl {
 
 
 
-        storeClient = HgStoreClient.create(pdClient);
+        storeClient = HgStoreClient.create(pdClient);// 创建HStoreClient
 
         graph = storeClient.openSession("hugegraph/g");
     }

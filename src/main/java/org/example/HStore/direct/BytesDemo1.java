@@ -13,9 +13,13 @@ import org.apache.hugegraph.serializer.direct.HBaseSerializer;
 import org.apache.hugegraph.serializer.direct.HStoreSerializer;
 import org.apache.hugegraph.serializer.direct.RocksDBSerializer;
 import org.apache.hugegraph.serializer.direct.util.IdGenerator;
+import org.apache.hugegraph.store.HgOwnerKey;
 import org.apache.hugegraph.structure.graph.Edge;
 import org.apache.hugegraph.structure.graph.Vertex;
 import org.example.HStore.HStoreSessionImpl;
+
+import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toBytes;
+import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toOwnerKey;
 
 /**
  * This class is a demo for Rocksdb/HBase/HStore put(rowkey, values) which use Client-Side's graph struct
@@ -25,7 +29,7 @@ import org.example.HStore.HStoreSessionImpl;
 public class BytesDemo1 {
 
     static HugeClient client;
-    boolean bypassServer = false;
+    boolean bypassServer = true;
     static SchemaManager schema;
     HStoreSerializer hStoreSerializer;
     static HStoreSessionImpl HStore;
@@ -36,9 +40,9 @@ public class BytesDemo1 {
 
     public BytesDemo1(){
         HStore = new HStoreSessionImpl();
-        client = HugeClient.builder("http://localhost:8080", "hugegraph").build();
-        schema = client.schema();
-        hStoreSerializer = new HStoreSerializer(client); // KV 点边序列化逻辑
+//        client = HugeClient.builder("http://localhost:8080", "hugegraph").build();
+//        schema = client.schema();
+//        hStoreSerializer = new HStoreSerializer(client); // KV 点边序列化逻辑
 
     }
 
@@ -49,6 +53,9 @@ public class BytesDemo1 {
 
         BytesDemo1 ins = new BytesDemo1();
 
+        byte[] key0 = toBytes("g0 owner-" + 1 + ";ownerKey-" + 1);
+        byte[] value0 = toBytes("g0 owner-" + 1 + ";ownerKey-" + 1);
+        HStore.addVetices(key0,key0,value0);
 
         //ins.createSchema(schema);//创建Schema
 
