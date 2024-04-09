@@ -40,9 +40,9 @@ public class BytesDemo1 {
 
     public BytesDemo1(){
         HStore = new HStoreSessionImpl();
-//        client = HugeClient.builder("http://localhost:8080", "hugegraph").build();
-//        schema = client.schema();
-//        hStoreSerializer = new HStoreSerializer(client); // KV 点边序列化逻辑
+        client = HugeClient.builder("http://localhost:8080", "hugegraph").build();
+        schema = client.schema();
+        hStoreSerializer = new HStoreSerializer(client); // KV 点边序列化逻辑
 
     }
 
@@ -57,18 +57,18 @@ public class BytesDemo1 {
         byte[] value0 = toBytes("g0 owner-" + 1 + ";ownerKey-" + 1);
         HStore.addVetices(key0,key0,value0);
 
-        //ins.createSchema(schema);//创建Schema
-
-        ins.CRUDGraphElements(putActionType);;//写入点边数据
-
-        System.out.println("====scan vertices====");
-        HStore.scan("vertices");//查询点边数据
-
-        System.out.println("====scan out edges====");
-        HStore.scan("out_edge");//查询点边数据
-
-        System.out.println("====get store partitions====");
-        HStore.getPartitions();
+//        ins.createSchema(schema);//创建Schema
+//
+//        ins.CRUDGraphElements(putActionType);;//写入点边数据
+//
+//        System.out.println("====scan vertices====");
+//        HStore.scan("vertices");//查询点边数据
+//
+//        System.out.println("====scan out edges====");
+//        HStore.scan("out_edge");//查询点边数据
+//
+//        System.out.println("====get store partitions====");
+//        HStore.getPartitions();
 //
 //
 //        System.out.println("====scan in edges====");
