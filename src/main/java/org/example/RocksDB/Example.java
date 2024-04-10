@@ -107,12 +107,12 @@ public class Example {
 
                 // 写入key/value
                 String key = "FirstKey";
-                rocksDB.put(cfHandle, key.getBytes(), "FirstValue".getBytes());
+                //rocksDB.put(cfHandle, key.getBytes(), "FirstValue".getBytes());
                 // 查询单key
                 byte[] getValue = rocksDB.get(cfHandle, key.getBytes());
                 System.out.println("get Value : " + new String(getValue));
                 // 写入第2个key/value
-                rocksDB.put(cfHandle, "SecondKey".getBytes(), "SecondValue".getBytes());
+                //rocksDB.put(cfHandle, "SecondKey".getBytes(), "SecondValue".getBytes());
 
                 List<byte[]> keys = Arrays.asList(key.getBytes(), "SecondKey".getBytes());
                 List<ColumnFamilyHandle> cfHandleList = Arrays.asList(cfHandle, cfHandle);
@@ -123,7 +123,7 @@ public class Example {
                 }
 
                 // 删除单key
-                rocksDB.delete(cfHandle, key.getBytes());
+                //rocksDB.delete(cfHandle, key.getBytes());
 
                 // 打印全部key
                 RocksIterator iter = rocksDB.newIterator(cfHandle);
@@ -143,7 +143,7 @@ public class Example {
 
     public static void main(String[] args) throws Exception {
         Example test = new Example();
-        test.testDefaultColumnFamily();
+        //test.testDefaultColumnFamily();
         test.testCertainColumnFamily();
 
         //TODO：类比HugeGraph 中 Scan 查询写法：抽象表达
