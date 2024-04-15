@@ -10,6 +10,7 @@ import org.rocksdb.DBOptions;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.TraceOptions;
 
 import org.rocksdb.WriteBatch;
 
@@ -105,6 +106,10 @@ public class Example {
                     }
                 }).collect(Collectors.toList()).get(0);
 
+                TraceOptions option = new TraceOptions();
+
+                //TODO: Java 增加 Trace 日志
+                //rocksDB.startTrace();
                 // 写入key/value
                 String key = "FirstKey";
                 //rocksDB.put(cfHandle, key.getBytes(), "FirstValue".getBytes());
