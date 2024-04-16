@@ -3,7 +3,7 @@
     1. HBase
     2. RocksDB
     3. HStore
-    4. ToplingDB
+    4. ToplingDB(从官方文档看，对Java 支持不友好 暂时放弃)
     5. MiniBase
 
 
