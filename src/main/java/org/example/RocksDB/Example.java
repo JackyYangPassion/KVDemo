@@ -12,7 +12,6 @@ import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.TraceOptions;
 
-import org.rocksdb.WriteBatch;
 
 
 import java.util.ArrayList;
@@ -77,7 +76,12 @@ public class Example {
                 iter = rocksDB.newIterator();
                 for (iter.seekToFirst(); iter.isValid(); iter.next()) {
                     System.out.println("iterator key:" + new String(iter.key()) + ", iter value:" + new String(iter.value()));
+
+
                 }
+                System.out.println("rocksdb.stats \n"+rocksDB.getProperty("rocksdb.stats"));
+
+
             }
         } catch (RocksDBException e) {
             e.printStackTrace();
@@ -135,6 +139,8 @@ public class Example {
                 for (iter.seekToFirst(); iter.isValid(); iter.next()) {
                     System.out.println("iterator:" + new String(iter.key()) + ":" + new String(iter.value()));
                 }
+
+                System.out.println("rocksdb.stats \n"+rocksDB.getProperty("rocksdb.stats"));
             } finally {
                 // NOTE frees the column family handles before freeing the db
                 for (final ColumnFamilyHandle cfHandle : cfHandles) {
