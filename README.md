@@ -3,7 +3,7 @@
     1. HBase
     2. RocksDB
     3. HStore
-    4. ToplingDB
+    4. ToplingDB(从官方文档看，对Java 支持不友好 暂时放弃)
     5. MiniBase
 
 
@@ -11,3 +11,4 @@
 # TODO-LIST
     增加经典KV 存储
     1. LevelDB
+    2. RocksDB [Overview Doc](https://github.com/facebook/rocksdb/wiki/RocksDB-Overview)  

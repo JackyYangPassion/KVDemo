@@ -10,8 +10,8 @@ import org.rocksdb.DBOptions;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.TraceOptions;
 
-import org.rocksdb.WriteBatch;
 
 
 import java.util.ArrayList;
@@ -76,7 +76,12 @@ public class Example {
                 iter = rocksDB.newIterator();
                 for (iter.seekToFirst(); iter.isValid(); iter.next()) {
                     System.out.println("iterator key:" + new String(iter.key()) + ", iter value:" + new String(iter.value()));
+
+
                 }
+                System.out.println("rocksdb.stats \n"+rocksDB.getProperty("rocksdb.stats"));
+
+
             }
         } catch (RocksDBException e) {
             e.printStackTrace();
@@ -105,14 +110,18 @@ public class Example {
                     }
                 }).collect(Collectors.toList()).get(0);
 
+                TraceOptions option = new TraceOptions();
+
+                //TODO: Java 增加 Trace 日志
+                //rocksDB.startTrace();
                 // 写入key/value
                 String key = "FirstKey";
-                rocksDB.put(cfHandle, key.getBytes(), "FirstValue".getBytes());
+                //rocksDB.put(cfHandle, key.getBytes(), "FirstValue".getBytes());
                 // 查询单key
                 byte[] getValue = rocksDB.get(cfHandle, key.getBytes());
                 System.out.println("get Value : " + new String(getValue));
                 // 写入第2个key/value
-                rocksDB.put(cfHandle, "SecondKey".getBytes(), "SecondValue".getBytes());
+                //rocksDB.put(cfHandle, "SecondKey".getBytes(), "SecondValue".getBytes());
 
                 List<byte[]> keys = Arrays.asList(key.getBytes(), "SecondKey".getBytes());
                 List<ColumnFamilyHandle> cfHandleList = Arrays.asList(cfHandle, cfHandle);
@@ -123,13 +132,15 @@ public class Example {
                 }
 
                 // 删除单key
-                rocksDB.delete(cfHandle, key.getBytes());
+                //rocksDB.delete(cfHandle, key.getBytes());
 
                 // 打印全部key
                 RocksIterator iter = rocksDB.newIterator(cfHandle);
                 for (iter.seekToFirst(); iter.isValid(); iter.next()) {
                     System.out.println("iterator:" + new String(iter.key()) + ":" + new String(iter.value()));
                 }
+
+                System.out.println("rocksdb.stats \n"+rocksDB.getProperty("rocksdb.stats"));
             } finally {
                 // NOTE frees the column family handles before freeing the db
                 for (final ColumnFamilyHandle cfHandle : cfHandles) {
@@ -143,7 +154,7 @@ public class Example {
 
     public static void main(String[] args) throws Exception {
         Example test = new Example();
-        test.testDefaultColumnFamily();
+        //test.testDefaultColumnFamily();
         test.testCertainColumnFamily();
 
         //TODO：类比HugeGraph 中 Scan 查询写法：抽象表达
