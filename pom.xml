@@ -133,6 +133,13 @@
             <version>2.0.10</version>
         </dependency>
 
+        <!--Add the pegasus java client dependency to your pom.xml file-->
+        <dependency>
+            <groupId>org.apache.pegasus</groupId>
+            <artifactId>pegasus-client</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
         <!--Add the ToplingDB dependency to your pom.xml file-->
 <!--        <dependency>-->
 <!--            <groupId>org.toplingdb</groupId>-->
