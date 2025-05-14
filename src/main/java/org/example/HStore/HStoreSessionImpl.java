@@ -15,11 +15,11 @@ import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toStr;
 /**
  * 模仿 HgKvStoreTest.java 测试用例开发使用
  * 1. 实现 HStore-Client 读写
- *
+ * <p>
  * 2. 实现基本逻辑
- *   a. createSession
- *   b. CRUD
- *
+ * a. createSession
+ * b. CRUD
+ * <p>
  * 底层点边表
  * put("unknown", 0);
  * put("g+v", 1);
@@ -29,7 +29,6 @@ import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toStr;
  * put("g+task", 5);
  * put("g+olap", 6);
  * put("g+server", 7);
- *
  */
 public class HStoreSessionImpl {
     public static HgStoreClient storeClient;
@@ -41,21 +40,12 @@ public class HStoreSessionImpl {
     public static final byte[] EMPTY_BYTES = new byte[0];
 
 
-
-    public HStoreSessionImpl(){
-
-//        PDConfig pdConfig =
-//                PDConfig.of(config.get(CoreOptions.PD_PEERS))
-//                        .setEnableCache(true);
-//
-//        hgStoreClient =
-//                HgStoreClient.create(defaultPdClient);
+    public HStoreSessionImpl() {
 
         PDConfig pdConfig =
                 PDConfig.of("127.0.0.1:8686")
                         .setEnableCache(true);
         pdClient = PDClient.create(pdConfig);
-
 
 
         storeClient = HgStoreClient.create(pdClient);// 创建HStoreClient
@@ -65,6 +55,7 @@ public class HStoreSessionImpl {
 
     /**
      * 查询指定图分区数 并扫描指定Partition 下的数据
+     *
      * @throws PDException
      */
     public void getPartitions() throws PDException {
@@ -73,10 +64,10 @@ public class HStoreSessionImpl {
         HgStoreSession session = storeClient.openSession("hugegraph/g");
         for (Metapb.Partition partition : partitions) {
             try (HgKvIterator<HgKvEntry> iterators = session.scanIterator("g+v",
-                                                                            (int) (partition.getStartKey()),
-                                                                            (int) (partition.getEndKey()),
-                                                                            HgKvStore.SCAN_HASHCODE,
-                                                                            EMPTY_BYTES)) {
+                    (int) (partition.getStartKey()),
+                    (int) (partition.getEndKey()),
+                    HgKvStore.SCAN_HASHCODE,
+                    EMPTY_BYTES)) {
 
                 System.out.println(
                         " " + partition.getId() + " " + HgStoreTestUtil.amountOf(iterators));
@@ -87,14 +78,13 @@ public class HStoreSessionImpl {
     }
 
 
-
-
     /**
      * 写入点表
+     *
      * @param rowkey
      * @param values
      */
-    public void addVetices(byte[] ownerKey, byte[] rowkey, byte[] values){
+    public void addVetices(byte[] ownerKey, byte[] rowkey, byte[] values) {
 
         //TODO:如何计算Partition_ID
         //int partitionID = ;
@@ -106,7 +96,7 @@ public class HStoreSessionImpl {
         //graph.directPut(VETEX_TABLE_NAME,1, key, values);
     }
 
-    public void deleteVertices(byte[] ownerkey,byte[] rowkey){
+    public void deleteVertices(byte[] ownerkey, byte[] rowkey) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
         graph.delete(VETEX_TABLE_NAME, key);
         //graph.deletePrefix(VETEX_TABLE_NAME,key);
@@ -115,39 +105,39 @@ public class HStoreSessionImpl {
 
     /**
      * 写入边表
+     *
      * @param rowkey
      * @param values
      */
-    public void addEdges(byte[] ownerkey, byte[] rowkey, byte[] values){
+    public void addEdges(byte[] ownerkey, byte[] rowkey, byte[] values) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
         graph.put(OUT_EDGE_TABLE_NAME, key, values);
     }
 
 
-
-    public void deleteEdges(byte[] ownerkey,byte[] rowkey){
+    public void deleteEdges(byte[] ownerkey, byte[] rowkey) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
         graph.delete(OUT_EDGE_TABLE_NAME, key);
         graph.delete(IN_EDGE_TABLE_NAME, key);
     }
 
-    public void scan(String type){
+    public void scan(String type) {
         HgKvIterator<HgKvEntry> iterator = null;
-        if(type.equals("in_edge")){
+        if (type.equals("in_edge")) {
             iterator = graph.scanIterator(IN_EDGE_TABLE_NAME);
-        } else if(type.equals("out_edge")) {
+        } else if (type.equals("out_edge")) {
             iterator = graph.scanIterator(OUT_EDGE_TABLE_NAME);
-        } else if(type.equals("vertices")){
+        } else if (type.equals("vertices")) {
             iterator = graph.scanIterator(VETEX_TABLE_NAME);
         }
 
-        System.out.println("Scan type: "+type);
+        System.out.println("Scan type: " + type);
         while (iterator.hasNext()) {
             HgKvEntry entry = iterator.next();
             byte[] keyFromHStore = entry.key();
             byte[] valueFromHStore = entry.value();
 
-            System.out.println("key: "+ toStr(keyFromHStore)+"  value: "+toStr(valueFromHStore));
+            System.out.println("key: " + toStr(keyFromHStore) + "  value: " + toStr(valueFromHStore));
         }
     }
 
@@ -162,7 +152,13 @@ public class HStoreSessionImpl {
         return str.getBytes(StandardCharsets.UTF_8);
     }
 
-    public static void main(String args[]){
+    /**
+     * 验证CRUD
+     *
+     * @param args
+     */
+
+    public static void main(String args[]) {
         new HStoreSessionImpl().scan("vertices");
     }
 }
