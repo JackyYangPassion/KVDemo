@@ -5,11 +5,8 @@ import org.apache.hugegraph.pd.client.PDConfig;
 import org.apache.hugegraph.pd.common.PDException;
 import org.apache.hugegraph.pd.grpc.Metapb;
 import org.apache.hugegraph.store.*;
-
-
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toStr;
 
 /**
@@ -33,7 +30,7 @@ import static org.apache.hugegraph.store.client.util.HgStoreClientUtil.toStr;
 public class HStoreSessionImpl {
     public static HgStoreClient storeClient;
     public static PDClient pdClient;
-    public static HgStoreSession graph;
+    public static HgStoreSession hgStoreSession;
     public static final String VETEX_TABLE_NAME = "g+v";
     public static final String OUT_EDGE_TABLE_NAME = "g+oe";
     public static final String IN_EDGE_TABLE_NAME = "g+ie";
@@ -50,7 +47,7 @@ public class HStoreSessionImpl {
 
         storeClient = HgStoreClient.create(pdClient);// 创建HStoreClient
 
-        graph = storeClient.openSession("hugegraph/g");
+        hgStoreSession = storeClient.openSession("hugegraph/g");
     }
 
     /**
@@ -92,13 +89,13 @@ public class HStoreSessionImpl {
         //this.graph.put(table, HgOwnerKey.of(ownerKey, key), value);
         HgOwnerKey key = HgOwnerKey.of(ownerKey, rowkey);
 
-        graph.put(VETEX_TABLE_NAME, key, values);
+        hgStoreSession.put(VETEX_TABLE_NAME, key, values);
         //graph.directPut(VETEX_TABLE_NAME,1, key, values);
     }
 
     public void deleteVertices(byte[] ownerkey, byte[] rowkey) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
-        graph.delete(VETEX_TABLE_NAME, key);
+        hgStoreSession.delete(VETEX_TABLE_NAME, key);
         //graph.deletePrefix(VETEX_TABLE_NAME,key);
     }
 
@@ -111,24 +108,24 @@ public class HStoreSessionImpl {
      */
     public void addEdges(byte[] ownerkey, byte[] rowkey, byte[] values) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
-        graph.put(OUT_EDGE_TABLE_NAME, key, values);
+        hgStoreSession.put(OUT_EDGE_TABLE_NAME, key, values);
     }
 
 
     public void deleteEdges(byte[] ownerkey, byte[] rowkey) {
         HgOwnerKey key = HgOwnerKey.of(ownerkey, rowkey);
-        graph.delete(OUT_EDGE_TABLE_NAME, key);
-        graph.delete(IN_EDGE_TABLE_NAME, key);
+        hgStoreSession.delete(OUT_EDGE_TABLE_NAME, key);
+        hgStoreSession.delete(IN_EDGE_TABLE_NAME, key);
     }
 
     public void scan(String type) {
         HgKvIterator<HgKvEntry> iterator = null;
         if (type.equals("in_edge")) {
-            iterator = graph.scanIterator(IN_EDGE_TABLE_NAME);
+            iterator = hgStoreSession.scanIterator(IN_EDGE_TABLE_NAME);
         } else if (type.equals("out_edge")) {
-            iterator = graph.scanIterator(OUT_EDGE_TABLE_NAME);
+            iterator = hgStoreSession.scanIterator(OUT_EDGE_TABLE_NAME);
         } else if (type.equals("vertices")) {
-            iterator = graph.scanIterator(VETEX_TABLE_NAME);
+            iterator = hgStoreSession.scanIterator(VETEX_TABLE_NAME);
         }
 
         System.out.println("Scan type: " + type);
@@ -159,6 +156,7 @@ public class HStoreSessionImpl {
      */
 
     public static void main(String args[]) {
-        new HStoreSessionImpl().scan("vertices");
+        HStoreSessionImpl hStoreSession = new HStoreSessionImpl();
+        hStoreSession.scan("vertices");
     }
 }
